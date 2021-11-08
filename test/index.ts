@@ -50,6 +50,14 @@ describe("Lottery", function () {
     expect(bClaimableBalance).to.equal(ethers.utils.parseEther("0.002"));
   });
 
+  it("placeBid should not work", async function () {
+    await expect(
+      lottery.connect(testA).placeBid({
+        value: ethers.utils.parseEther("0.00001"),
+      })
+    ).to.be.revertedWith("Insufficient bid cost");
+  });
+
   it("claimTeasure should work", async function () {
     await lottery.connect(testA).placeBid({
       value: bidCost,
