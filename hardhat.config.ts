@@ -24,15 +24,16 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 const config: HardhatUserConfig = {
   solidity: "0.8.4",
+  defaultNetwork: "rinkeby",
   networks: {
-    ropsten: {
-      url: process.env.ROPSTEN_URL || "",
+    rinkeby: {
+      url: process.env.RINKEBY_URL || "",
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     hardhat: {
       mining: {
-        auto: false,
+        auto: true,
         interval: 3000,
       },
     },
@@ -45,7 +46,7 @@ const config: HardhatUserConfig = {
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
   typechain: {
-    outDir: "src/types",
+    outDir: "types",
     alwaysGenerateOverloads: true, // should overloads with full signatures like deposit(uint256) be generated always, even if there are no overloads?
     externalArtifacts: ["externalArtifacts/*.json"], // optional array of glob patterns with external artifacts to process (for example external libs from node_modules)
   },

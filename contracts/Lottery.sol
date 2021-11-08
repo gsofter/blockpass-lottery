@@ -19,14 +19,12 @@ contract Lottery {
         _;
     }
 
-    function calcReward() private {
-        console.log("Lottery.calcReward.block.number => ", block.number);
+    function calcReward() public {
         if((block.number - latestBlock) >= BLOCK_DIST) {
             rewards[latestBidder] += stackedAmount;
             stackedAmount = 0;
         }
     }
-
 
     function placeBid() canBid  external payable {
         calcReward();
@@ -55,14 +53,6 @@ contract Lottery {
     }
 
     function getStakedBalance() external view returns(uint) {
-        console.log("Lottery.getStakedBalance.block.number => ", block.number);
         return stackedAmount;
-    }
-
-    function calculateRewards(uint _amount) public {
-        require(msg.sender != address(0), "Address not valid");
-        console.log("Lottery.calculateRewards._amount => ", _amount);
-        console.log("Lottery.calculateRewards.msg.sender => ", msg.sender);
-        calcReward();
-    }
+    }    
 }

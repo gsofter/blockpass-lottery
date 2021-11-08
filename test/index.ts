@@ -1,8 +1,8 @@
+import { BigNumber } from "@ethersproject/bignumber";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { Signer } from "ethers";
 import hre, { ethers } from "hardhat";
-import { Lottery } from "../src/types";
+import { Lottery } from "../types";
 
 async function mineBlocks(blocks: Number) {
   for (let i = 0; i < blocks; i++)
@@ -28,9 +28,7 @@ describe("Lottery", function () {
     testB = accounts[1];
   });
 
-  it("Should work with placeBid", async function () {
-    console.log("lottery.address =>", lottery.address);
-
+  it("placeBid should work", async function () {
     await lottery.connect(testA).placeBid({
       value: bidCost,
     });
@@ -41,23 +39,33 @@ describe("Lottery", function () {
 
     await mineBlocks(5);
 
-    let aClaimableBalance = await lottery.getClaimableBalance(testA.address);
-    console.log("A.claimableBalance => ", aClaimableBalance);
+    const aClaimableBalance = await lottery.getClaimableBalance(testA.address);
+    expect(aClaimableBalance).to.equal(ethers.utils.parseEther("0"));
 
-    let bClaimableBalance = await lottery.getClaimableBalance(testB.address);
-    console.log("B.claimableBalance => ", bClaimableBalance);
-
-  await lottery.connect(testB).calculateRewards(1000);
     const stakedBalance = await lottery.getStakedBalance();
     expect(stakedBalance).to.equal(ethers.utils.parseEther("0.002"));
 
-  
+    await lottery.connect(testB).calcReward();
+    const bClaimableBalance = await lottery.getClaimableBalance(testB.address);
+    expect(bClaimableBalance).to.equal(ethers.utils.parseEther("0.002"));
+  });
 
-    bClaimableBalance = await lottery.getClaimableBalance(testB.address)
+  it("claimTeasure should work", async function () {
+    await lottery.connect(testA).placeBid({
+      value: bidCost,
+    });
 
-    expect(bClaimableBalance).to.equal(ethers.utils.parseEther('0.002'))
+    await lottery.connect(testB).placeBid({
+      value: bidCost,
+    });
+    await mineBlocks(5);
 
-    // expect(aClaimableBalance).to.equal(ethers.utils.parseEther("0.002"));
-    // expect(bClaimableBalance).to.equal(ethers.utils.parseEther("0.002"));
+    await lottery.connect(testB).calcReward();
+    const claimableBalance = await lottery.getClaimableBalance(testB.address);
+    expect(claimableBalance).to.equal(ethers.utils.parseEther("0.002"));
+
+    await lottery.connect(testB).claimTreasure();
+    const restBalance = await lottery.getClaimableBalance(testB.address);
+    expect(restBalance).to.equal(ethers.utils.parseEther("0"));
   });
 });
